@@ -7,14 +7,14 @@ import (
 	"TikTok/middleware/rabbitmq"
 	"TikTok/middleware/redis"
 	"TikTok/util"
+
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
-//如果启动有问题，大概是你的IP地址出现变化，需要在项目依赖的服务器中配置安全组
+// 如果启动有问题，大概是你的IP地址出现变化，需要在项目依赖的服务器中配置安全组
 func main() {
 	//关闭log
-	//log.SetOutput(ioutil.Discard)
 	initDeps()
 	//gin
 	r := gin.Default()

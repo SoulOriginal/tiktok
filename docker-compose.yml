@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: tiktok-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./config/douyin.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - tiktok-network
+
+  redis:
+    image: redis:6-alpine
+    container_name: tiktok-redis
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - tiktok-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: tiktok-rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"   
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - tiktok-network
+
+  vsftpd:
+    build:
+      context: ./docker/ftp-ssh
+      args:
+        FTP_USER: ${FTP_USER}
+        FTP_PASSWORD: ${FTP_PASSWORD}
+    container_name: tiktok-ftp
+    restart: always
+    ports:
+      - "21:21"
+      - "22:22"
+      - "21100-21110:21100-21110"
+    volumes:
+      - ftp-data:/home/ftpuser
+    networks:
+      - tiktok-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: tiktok-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ftp-data:/usr/share/nginx/html:ro
+      - ./config/nginx-docker.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - vsftpd
+    networks:
+      - tiktok-network
+
+  app:
+    build: .
+    container_name: tiktok-app
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+      - vsftpd
+    networks:
+      - tiktok-network
+    environment:
+      - TZ=Asia/Shanghai
+
+volumes:
+  mysql-data:
+  redis-data:
+  rabbitmq-data:
+  ftp-data:
+
+networks:
+  tiktok-network:
+    driver: bridge

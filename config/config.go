@@ -16,17 +16,17 @@ var ExpireTime = time.Hour * 48 // 设置Redis数据热度消散时间。
 const VideoCount = 5
 
 // ConConfig ftp服务器地址
-const ConConfig = "43.138.25.60:21"
+const ConConfig = "tiktok-ftp:21"
 const FtpUser = "ftpuser"
 const FtpPsw = "424193726"
 const HeartbeatTime = 2 * 60
 
 // PlayUrlPrefix 存储的图片和视频的链接
-const PlayUrlPrefix = "http://43.138.25.60/"
-const CoverUrlPrefix = "http://43.138.25.60/images/"
+const PlayUrlPrefix = "http://localhost/"
+const CoverUrlPrefix = "http://localhost/images/"
 
 // HostSSH SSH配置
-const HostSSH = "43.138.25.60"
+const HostSSH = "tiktok-ftp"
 const UserSSH = "ftpuser"
 const PasswordSSH = "424193726"
 const TypeSSH = "password"
